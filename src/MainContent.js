@@ -5,6 +5,7 @@ import Select from "react-select";
 import { useTvApi } from "./requests";
 import { Grid } from "semantic-ui-react";
 import GenerateTweets from "./GenerateTweets";
+import { isObjectPopulated } from "./utilities/general";
 
 export default function MainContent() {
   const { getShows, getSeasons, getEpisodes } = useTvApi();
@@ -34,13 +35,15 @@ export default function MainContent() {
     return options.map((option) => ({
       value: option.id,
       label: option.name,
-      rest: option,
+      airdate: option.airdate,
     }));
   };
 
   const debounceLoadOptions = useCallback(
-    debounce((inputText, callback) => {
-      const val = inputText?.length ? inputText : inputVal;
+    debounce((inputText, callback, localInput) => {
+      // console.log("here", inputText, localInput);
+      if (!callback || typeof callback === "undefined") return;
+      const val = inputText?.length ? inputText : localInput;
       getShows(val).then((options) =>
         callback(mapShowsToDropdownElements(options))
       );
@@ -50,6 +53,8 @@ export default function MainContent() {
   const handleSelectedShow = (selected) => {
     setSelectedShow(selected);
     setSeasons([]);
+    setSelectedSeason({});
+    setSelectedEpisode({});
     getSeasons(selected.value).then((resp) => {
       return setSeasons(mapSeasonsToDropdownElements(resp));
     });
@@ -58,65 +63,110 @@ export default function MainContent() {
   const handleSelectedSeason = (selected) => {
     setSelectedSeason(selected);
     setEpisodes([]);
+    setSelectedEpisode({});
     getEpisodes(selected.value).then((resp) => {
       return setEpisodes(mapEpisodesToDropdownElements(resp));
     });
   };
 
   const handleSelectedEpisode = (selected) => {
-    console.log(selected);
     setSelectedEpisode(selected);
   };
 
+  const showSeasons = useMemo(
+    () => isObjectPopulated(selectedShow),
+    [selectedShow]
+  );
+
+  const showEpisodes = useMemo(
+    () => isObjectPopulated(selectedShow) && isObjectPopulated(selectedSeason),
+    [selectedShow, selectedSeason]
+  );
+
+  const showFindButton = useMemo(
+    () =>
+      isObjectPopulated(selectedShow) &&
+      isObjectPopulated(selectedSeason) &&
+      isObjectPopulated(selectedEpisode),
+    [selectedShow, selectedSeason, selectedEpisode]
+  );
+
+  const handleShowChange = (inputValue, { action }) => {
+    // console.log("things", inputValue, action);
+    if (selectedShow?.label) {
+      setSelectedShow({});
+    }
+    console.log("inputValue", inputValue);
+    console.log("inputVal", inputVal);
+    console.log("action", action);
+    console.log("---------------------------");
+
+    if (
+      action !== "set-value" &&
+      action !== "menu-close" &&
+      action !== "input-blur"
+    ) {
+      setInputVal(inputValue);
+      return inputValue;
+    }
+
+    setInputVal(inputVal);
+    return inputVal;
+  };
+
+  console.log(selectedShow, inputVal);
   return (
     <div>
       <div className="filters">
         <div className="filter">
           <AsyncSelect
-            loadOptions={debounceLoadOptions}
+            loadOptions={(val, cb) => debounceLoadOptions(val, cb, inputVal)}
             cacheOptions
-            defaultOptions
             name="shows"
-            placeholder="Show..."
-            onInputChange={setInputVal}
+            placeholder={selectedShow.label || "What are you watching?"}
+            inputValue={selectedShow.label || inputVal}
+            onInputChange={handleShowChange}
             onChange={handleSelectedShow}
-            onMenuClose={() => setSave(inputVal)} // before the input is cleared, save its value here
-            onFocus={() => {
-              setInputVal(inputSave); // keeps the input
-              setSave(""); // prevents undesired placeholder value
-            }}
+            onMenuOpen={(val, cb) => debounceLoadOptions(val, cb, inputVal)}
           />
         </div>
-        <div className="filter">
-          <Select
-            className="basic-single"
-            classNamePrefix="select"
-            placeholder="Season..."
-            isDisabled={!selectedShow}
-            isSearchable
-            name="seasons"
-            options={seasons}
-            onChange={handleSelectedSeason}
-          />
-        </div>
-        <div className="filter">
-          <Select
-            className="basic-single"
-            classNamePrefix="select"
-            placeholder="Episode..."
-            isDisabled={!selectedShow || !selectedSeason}
-            isSearchable
-            name="episodes"
-            options={episodes}
-            onChange={handleSelectedEpisode}
-          />
-        </div>
+        {showSeasons ? (
+          <div className="filter">
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              placeholder="Season..."
+              isDisabled={!showSeasons}
+              selectValue={selectedSeason}
+              isSearchable
+              name="seasons"
+              options={seasons}
+              onChange={handleSelectedSeason}
+            />
+          </div>
+        ) : null}
+        {showEpisodes ? (
+          <div className="filter">
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              placeholder="Episode..."
+              isDisabled={!showEpisodes}
+              isSearchable
+              name="episodes"
+              options={episodes}
+              onChange={handleSelectedEpisode}
+            />
+          </div>
+        ) : null}
       </div>
-      <GenerateTweets
-        selectedShow={selectedShow}
-        selectedSeason={selectedSeason}
-        selectedEpisode={selectedEpisode}
-      />
+      {showFindButton ? (
+        <GenerateTweets
+          selectedShow={selectedShow}
+          selectedSeason={selectedSeason}
+          selectedEpisode={selectedEpisode}
+        />
+      ) : null}
     </div>
   );
 }

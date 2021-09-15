@@ -14,14 +14,12 @@ export const useTvApi = () => {
   const getSeasons = useCallback(async (showId: number) => {
     const url = `${baseURL}shows/${showId}/seasons`;
     const response = await axios.get(url);
-    console.log(response);
     return response.data;
   }, []);
 
   const getEpisodes = useCallback(async (seasonId: number) => {
     const url = `${baseURL}seasons/${seasonId}/episodes`;
     const response = await axios.get(url);
-    console.log(response);
     return response.data;
   }, []);
 

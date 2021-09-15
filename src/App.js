@@ -7,9 +7,7 @@ function App() {
   return (
     <div className="App">
       <Container>
-        <Header size="huge" className="App-logo">
-          Episode Soup
-        </Header>
+        <div className="App-logo">Episode Soup</div>
         <Container className="main-container">
           <MainContent />
         </Container>

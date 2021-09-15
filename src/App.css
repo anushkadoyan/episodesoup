@@ -1,21 +1,53 @@
 @import "semantic-ui-css/semantic.min.css";
-
+@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap");
 .App {
   text-align: center;
   padding: 20px;
+  padding-top: 10%;
+
   display: flex;
   justify-content: center;
-  align-items: center;
+  background: url("https://i.pinimg.com/originals/ee/58/d9/ee58d971682ad2e99b4e6c891bc9417d.gif");
+
+  background-color: #1c2930;
+  background-size: cover;
+  background-position-x: -100px;
+  background-repeat: no-repeat;
+  background-position-y: 0px;
+  background-size: 1000px;
 }
 
 #root,
 .App {
   height: 100%;
+  font-family: "Fredoka One", cursive !important;
+  background-color: #1c2930;
 }
 .App-logo {
   margin: 30px;
   pointer-events: none;
+  font-size: 4em !important;
+  /* color: #3d5c96; */
+  color: #ff8d3c;
 }
+
+/* Portrait */
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait) {
+  .App {
+    background: url("https://i.pinimg.com/originals/ee/58/d9/ee58d971682ad2e99b4e6c891bc9417d.gif");
+    background-position-x: -80px;
+    background-repeat: no-repeat;
+    background-position-y: 95%;
+    background-size: 500px;
+    padding-top: 50%;
+  }
+  .App-logo {
+    margin: 0px 0px 20px 0px;
+    line-height: 1;
+    font-size: 3.5em !important;
+  }
+}
+
 /* 
 
 
@@ -41,10 +73,6 @@
 }
  */
 
-.App-logo {
-  /* animation: App-logo-spin infinite 5s linear; */
-  /* font-size: 40px !important; */
-}
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -64,4 +92,10 @@
 .filters > * {
   margin: 15px 0px;
   width: 100%;
+}
+
+.filters input {
+  opacity: 1 !important;
+  font-family: "Fredoka One", cursive !important;
+  width: 100% !important;
 }
