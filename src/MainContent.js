@@ -11,6 +11,7 @@ export default function MainContent() {
   const { getShows, getSeasons, getEpisodes } = useTvApi();
   const [inputVal, setInputVal] = useState("");
   const [inputSave, setSave] = useState("");
+  const [showOptions, setShowOptions] = useState([]);
 
   const [selectedShow, setSelectedShow] = useState({});
   const [selectedSeason, setSelectedSeason] = useState({});
@@ -40,12 +41,10 @@ export default function MainContent() {
   };
 
   const debounceLoadOptions = useCallback(
-    debounce((inputText, callback, localInput) => {
-      // console.log("here", inputText, localInput);
-      if (!callback || typeof callback === "undefined") return;
-      const val = inputText?.length ? inputText : localInput;
-      getShows(val).then((options) =>
-        callback(mapShowsToDropdownElements(options))
+    debounce((inputText) => {
+      if (!inputText?.length) return;
+      getShows(inputText).then((options) =>
+        setShowOptions(mapShowsToDropdownElements(options))
       );
     }, 500),
     []
@@ -55,6 +54,8 @@ export default function MainContent() {
     setSeasons([]);
     setSelectedSeason({});
     setSelectedEpisode({});
+    if (!selected) setShowOptions([]);
+    if (!selected?.value) return;
     getSeasons(selected.value).then((resp) => {
       return setSeasons(mapSeasonsToDropdownElements(resp));
     });
@@ -64,6 +65,7 @@ export default function MainContent() {
     setSelectedSeason(selected);
     setEpisodes([]);
     setSelectedEpisode({});
+    if (!selected?.value) return;
     getEpisodes(selected.value).then((resp) => {
       return setEpisodes(mapEpisodesToDropdownElements(resp));
     });
@@ -90,44 +92,20 @@ export default function MainContent() {
       isObjectPopulated(selectedEpisode),
     [selectedShow, selectedSeason, selectedEpisode]
   );
-
-  const handleShowChange = (inputValue, { action }) => {
-    // console.log("things", inputValue, action);
-    if (selectedShow?.label) {
-      setSelectedShow({});
-    }
-    console.log("inputValue", inputValue);
-    console.log("inputVal", inputVal);
-    console.log("action", action);
-    console.log("---------------------------");
-
-    if (
-      action !== "set-value" &&
-      action !== "menu-close" &&
-      action !== "input-blur"
-    ) {
-      setInputVal(inputValue);
-      return inputValue;
-    }
-
-    setInputVal(inputVal);
-    return inputVal;
-  };
-
-  console.log(selectedShow, inputVal);
+  console.log();
   return (
     <div>
       <div className="filters">
         <div className="filter">
-          <AsyncSelect
-            loadOptions={(val, cb) => debounceLoadOptions(val, cb, inputVal)}
+          <Select
             cacheOptions
             name="shows"
-            placeholder={selectedShow.label || "What are you watching?"}
-            inputValue={selectedShow.label || inputVal}
-            onInputChange={handleShowChange}
+            placeholder="What are you watching?"
+            options={showOptions}
+            onInputChange={debounceLoadOptions}
             onChange={handleSelectedShow}
-            onMenuOpen={(val, cb) => debounceLoadOptions(val, cb, inputVal)}
+            isClearable
+            closeMenuOnSelect={false}
           />
         </div>
         {showSeasons ? (
@@ -137,11 +115,11 @@ export default function MainContent() {
               classNamePrefix="select"
               placeholder="Season..."
               isDisabled={!showSeasons}
-              selectValue={selectedSeason}
               isSearchable
               name="seasons"
               options={seasons}
               onChange={handleSelectedSeason}
+              isClearable
             />
           </div>
         ) : null}
@@ -156,6 +134,7 @@ export default function MainContent() {
               name="episodes"
               options={episodes}
               onChange={handleSelectedEpisode}
+              isClearable
             />
           </div>
         ) : null}
