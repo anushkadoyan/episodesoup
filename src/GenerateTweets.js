@@ -1,33 +1,34 @@
-import { useMemo } from "react";
-import { Button } from "semantic-ui-react";
+import { Button, Icon } from "semantic-ui-react";
 import { getTwitterUrl } from "./utilities/twitter";
 import moment from "moment";
 
 function GenerateTweets(props) {
-  const { selectedShow, selectedSeason, selectedEpisode } = props;
-
-  const validInfo = useMemo(() =>
-    Object.values(props)?.every(
-      (selectedThing) => selectedThing && selectedThing?.value
-    )
-  );
+  const { selectedShow, selectedEpisode, validInfo } = props;
 
   const handleClick = () => {
-    const { airdate, label } = selectedEpisode;
+    const { airdate } = selectedEpisode;
+    // TODO
+    // narrow down by air time, not just date
+    // https://twittercommunity.com/t/how-to-find-tweets-posted-at-a-specific-time/148323/2
     const nextDay = moment(selectedEpisode.airdate)
       ?.add(1, "day")
       .format("YYYY-MM-DD");
-    console.log(selectedShow);
     const url = getTwitterUrl(selectedShow.label, airdate, nextDay);
     window.open(url, "_blank");
   };
 
   return (
-    <div className="generate-tweets">
-      <Button onClick={handleClick} disabled={!validInfo}>
-        Find Tweets
-      </Button>
-    </div>
+    <Button
+      color="twitter"
+      onClick={handleClick}
+      disabled={!validInfo}
+      size="mini"
+    >
+      <Icon name="twitter" /> Twitter
+    </Button>
+    // <Button onClick={handleClick} disabled={!validInfo} color="blue">
+    //   Tweets
+    // </Button>
   );
 }
 

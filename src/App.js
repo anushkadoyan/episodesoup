@@ -1,15 +1,15 @@
 import "./App.css";
 import MainContent from "./MainContent";
 
-import { Header, Container } from "semantic-ui-react";
+import { Container } from "semantic-ui-react";
 function App() {
   return (
     <div className="App">
       <Container>
         <div className="App-logo">Episode Soup</div>
-        <Container className="main-container">
+        <div className="main-container">
           <MainContent />
-        </Container>
+        </div>
       </Container>
     </div>
   );
